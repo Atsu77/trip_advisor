@@ -10,7 +10,8 @@ RSpec.describe 'RegistrationsApis', type: :request do
           name: user.name,
           email: user.email,
           password: user.password,
-          password_confirmation: user.password_confirmation
+          password_confirmation: user.password_confirmation,
+          confirm_success_url: "https://google.com"
         }
         expect(response).to have_http_status(200)
       end
@@ -20,7 +21,8 @@ RSpec.describe 'RegistrationsApis', type: :request do
           name: user.name,
           email: user.email,
           password: user.password,
-          password_confirmation: 'not_confirmation_password'
+          password_confirmation: 'not_confirmation_password',
+          confirm_success_url: "https://google.com"
         }
         expect(response).to have_http_status(422)
       end
