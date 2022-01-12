@@ -1,0 +1,59 @@
+version: 2
+
+jobs:
+  build:
+    docker:
+      - image: circleci/ruby:2.7.2
+        environment:
+          POSTGRES_HOST: localhost
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          RAILS_ENV: test
+      - image: circleci/postgres:11.12
+        environment:
+          POSTGRES_DB: api_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+
+    working_directory: ~/trip_advisor/
+    steps:
+      - checkout
+      - run:
+          name: Install System Dependencies
+          command: |
+            sudo apt-get update --allow-releaseinfo-change
+            sudo apt-get install -y lsb-release
+
+      - restore_cache:
+          name: Restore bundle cache
+          keys:
+            - api-bundle-{{ checksum "Gemfile.lock" }}
+            - api-bundle-
+
+      - run:
+          name: Bundle Install
+          command: bin/bundle check --path vendor/bundle || bin/bundle install --path vendor/bundle --jobs 4 --retry 3
+
+      - save_cache:
+          name: Store bundle cache
+          key: api-bundle-{{ checksum "Gemfile.lock" }}
+          paths:
+            - vendor/bundle
+
+      - run:
+          name: rubocop
+          command: bin/bundle exec rubocop
+
+      - run:
+          name: Set up DB
+          command: dockerize -wait tcp://localhost:5432 -timeout 120s
+
+      - run: bin/bundle exec rails db:create
+      - run: bin/bundle exec rails db:schema:load
+
+      - run:
+          name: RSpec
+          command: bin/bundle exec rspec
+
+      - store_artifacts:
+          path: coverage
