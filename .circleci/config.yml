@@ -40,9 +40,9 @@ jobs:
           paths:
             - vendor/bundle
 
-      - run:
-          name: rubocop
-          command: bin/bundle exec rubocop
+      #- run:
+      #    name: rubocop
+      #    command: bin/bundle exec rubocop
 
       - run:
           name: Set up DB
@@ -54,6 +54,3 @@ jobs:
       - run:
           name: RSpec
           command: bin/bundle exec rspec
-
-      - store_artifacts:
-          path: coverage
